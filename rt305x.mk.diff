@@ -1,0 +1,21 @@
+diff --git a/target/linux/ramips/image/rt305x.mk b/target/linux/ramips/image/rt305x.mk
+index 4edc2eb3c4..fe5143adaa 100644
+--- a/target/linux/ramips/image/rt305x.mk
++++ b/target/linux/ramips/image/rt305x.mk
+@@ -889,6 +889,16 @@ define Device/poray_m4-4m
+ endef
+ TARGET_DEVICES += poray_m4-4m
+
++define Device/ivt_ueye01
++  SOC := rt5350
++  IMAGE_SIZE := 7872k
++  DEVICE_VENDOR := IVT
++  DEVICE_MODEL := ueye01
++  DEVICE_PACKAGES := kmod-usb2
++  SUPPORTED_DEVICES += ueye01
++endef
++TARGET_DEVICES += ivt_ueye01
++
+ define Device/poray_m4-8m
+   SOC := rt5350
+   IMAGE_SIZE := 7872k

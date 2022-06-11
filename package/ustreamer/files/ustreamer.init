@@ -1,0 +1,50 @@
+#!/bin/sh /etc/rc.common
+
+START=90
+STOP=10
+
+USE_PROCD=1
+PROG=/usr/bin/ustreamer
+
+start_instance() {
+    config_get_bool enabled $1 enabled 0
+    [ "$enabled" -eq 0 ] && return
+
+    #enable camera
+    echo 0 >/sys/class/gpio/usbpull/value
+    echo 1 >/sys/class/gpio/usb/value
+
+    procd_open_instance
+    procd_set_param command $PROG
+    for param in device device-timeout input resolution format quality encoder host static user password port desired-fps; do
+        local key=${param//-/_}
+        config_get value $1 $key ''
+        if [ -n "$value" ];then
+            procd_append_param command "--$param=$value"
+            if [ "$key" == "port" ];then
+                procd_add_mdns http tcp "$value" daemon=ustreamer
+            fi
+        fi
+    done
+
+    config_get_bool slowdown $1 slowdown 1
+    [ "$slowdown" -eq 1 ] && procd_append_param command --slowdown
+
+    procd_set_param respawn
+    procd_close_instance
+}
+
+start_service() {
+    config_load ustreamer
+    config_foreach start_instance ustreamer
+}
+
+service_triggers() {
+    procd_add_reload_trigger ustreamer
+}
+
+stop_service() {
+    #disable camera
+    echo 0 >/sys/class/gpio/usb/value
+    echo 1 >/sys/class/gpio/usbpull/value
+}
